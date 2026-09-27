@@ -1,0 +1,45 @@
+# Codex Browser Proxy Fix for Windows
+
+Purpose: help humans and AI assistants diagnose one specific Windows Codex Browser Use failure mode.
+
+Exact error:
+nodeRepl.fetch request failed
+
+High-confidence signature:
+- Codex Desktop on Windows
+- Chrome/Edge/Browser extension appears installed correctly
+- cua.getState() or tab/page operations fail with nodeRepl.fetch request failed
+- direct network access from the CUA/Node path fails or times out
+- the same endpoint is reachable through a trusted local HTTP/mixed proxy
+
+Workaround:
+Before cua_repl.launch(), make the spawned browser-control process inherit:
+NODE_USE_ENV_PROXY=1
+HTTP_PROXY=http://127.0.0.1:<local-http-or-mixed-proxy-port>
+HTTPS_PROXY=http://127.0.0.1:<local-http-or-mixed-proxy-port>
+NO_PROXY=localhost,127.0.0.1,::1
+Also set lowercase variants for compatibility.
+
+Important:
+- Do not hard-code another person's proxy port.
+- Do not use this as a universal fix for all nodeRepl.fetch errors.
+- Do not disable TLS verification or Windows security.
+- Back up the active cua-repl.mjs before patching.
+- Run the current runtime node.exe --check after patching.
+- Fully exit and restart Codex, then verify cua.getState() and real page reads multiple times.
+- Codex updates may replace the runtime; re-diagnose after updates.
+
+Human guide: README.zh-CN.md and docs/HUMAN_GUIDE.md
+AI decision tree: AI_REPAIR_GUIDE.md
+Scripts: scripts/
+
+Original public repair idea credit:
+Douyin creator: 灵感提示官
+Douyin ID: 89687306917
+Repository maintainer is not the original Douyin creator.
+
+References:
+https://nodejs.org/api/cli.html#--use-env-proxy
+https://nodejs.org/api/http.html#built-in-proxy-support
+https://github.com/openai/codex/issues/44364
+https://github.com/openai/codex/issues/47123
