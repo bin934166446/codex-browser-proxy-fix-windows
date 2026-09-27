@@ -1,136 +1,199 @@
-# Codex Browser Proxy Fix for Windows
+# Codex Windows 浏览器 `nodeRepl.fetch request failed` 代理修复
 
-A community workaround for a Windows Codex / ChatGPT Desktop Browser Use failure where Chrome, Edge, or the in-app browser may be detected but browser-control calls fail with:
+[English](README.en.md)
+
+这是一个面向 **Windows Codex / ChatGPT Desktop Browser Use** 的社区修复项目。
+
+典型故障是：Chrome、Edge 或浏览器扩展看起来都正常，但 Codex 一读取标签页、执行 `cua.getState()` 或读取网页内容，就报：
 
 ```text
 nodeRepl.fetch request failed
 ```
 
-This project documents a reproducible proxy-inheritance failure mode and provides conservative PowerShell helpers to diagnose, patch, and restore the active Codex CUA (`cua-repl`) runtime.
+本项目整理的是其中一种已经过实机验证的根因：**Codex CUA 的 Node 浏览器控制运行时没有正确继承本机代理，导致 Node 对外请求直连失败。**
 
-> **Not an official OpenAI fix.** Codex updates can replace the runtime and remove the patch. Use only a trusted local HTTP/mixed proxy that you are authorized to use.
+> 这不是 OpenAI 官方修复，也不是所有同名报错的通用答案。Codex 更新后运行时可能被替换，需要重新检查。
 
-## When this workaround is relevant
+## 适用特征
 
-Typical symptoms:
+如果你的情况同时满足下面几项，这个方案值得优先验证：
 
-- Windows Codex Desktop can see Chrome/Edge or the browser extension is installed correctly.
-- Native Messaging / basic computer-control plumbing appears healthy.
-- `cua.getState()`, tab enumeration, or page operations fail with `nodeRepl.fetch request failed`.
-- Direct access from the CUA Node process to required OpenAI endpoints times out or fails.
-- The same endpoint is reachable through a local HTTP/mixed proxy such as Xray, Clash/Mihomo, sing-box, or V2Ray.
+- Windows Codex Desktop；
+- Chrome / Edge 已安装，扩展也正常；
+- Native Messaging 或基础 Computer Use 管道正常；
+- `cua.getState()` / 列标签页 / 读页面时报 `nodeRepl.fetch request failed`；
+- 本机使用 Xray、Clash/Mihomo、sing-box、V2Ray 等本地代理；
+- 直连 OpenAI 相关地址超时，但通过本地 HTTP/mixed 代理可以收到 HTTP 响应。
 
-This workaround is **not** a universal fix for every `nodeRepl.fetch request failed`. Other root causes exist. Run the diagnostic first.
+## 原理
 
-## Verified mechanism
+现代 Node.js 支持通过：
 
-Node.js can use `HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY` when environment-proxy support is enabled. Modern Node versions support `NODE_USE_ENV_PROXY=1` / `--use-env-proxy`.
+```text
+NODE_USE_ENV_PROXY=1
+HTTP_PROXY
+HTTPS_PROXY
+NO_PROXY
+```
 
-In the reproduced Windows failure, the Codex CUA runtime did not effectively pass the local proxy environment to the Node browser-control child process. Injecting the proxy variables immediately before `cua_repl.launch()` allowed the spawned process to inherit them. After a full Codex restart, `cua.getState()`, Chrome tab enumeration, and page reading recovered.
+让 Node 的网络请求读取环境代理。
 
-## Quick start
+在已验证案例中，Codex 上层虽然能使用代理，但 CUA / `node_repl` 没有正确继承这些变量。将代理环境变量在 `cua_repl.launch()` 之前注入，使随后启动的浏览器控制子进程继承代理，完整重启 Codex 后恢复。
 
-Open PowerShell **without Administrator rights unless your installation specifically requires it**.
+## 快速使用
 
-### 1. Diagnose
+### 1）先诊断，不要直接改
 
 ```powershell
 Set-ExecutionPolicy -Scope Process Bypass
 .\scripts\Diagnose-CodexBrowserProxy.ps1 -ProxyUrl http://127.0.0.1:10808
 ```
 
-Replace `10808` with your own local **HTTP/mixed proxy** port.
+`10808` 只是示例。必须换成你电脑上真实的 **HTTP/mixed 代理端口**。
 
-A useful signal is:
+如果结果是：
 
-- direct request: timeout/failure
-- proxied request: receives any normal HTTP response (for example 401/403)
+```text
+直连：超时/失败
+代理：能收到 401 / 403 / 其他正常 HTTP 状态码
+```
 
-A 401/403 only proves network reachability; it does **not** prove authentication.
+说明“CUA 需要显式走代理”这个方向很值得继续。
 
-### 2. Apply the patch
+注意：401/403 只证明网络能到达服务器，不代表账号登录成功。
+
+### 2）应用补丁
 
 ```powershell
 .\scripts\Fix-CodexBrowserProxy.ps1 -ProxyUrl http://127.0.0.1:10808 -Apply
 ```
 
-The script:
+脚本会：
 
-1. Finds the currently active `unified-computer-use` plugin metadata.
-2. Finds the active/latest CUA runtime `cua-repl.mjs`.
-3. Creates a timestamped backup.
-4. Injects only the proxy environment block before `cua_repl.launch()`.
-5. Runs `node --check` against the modified module.
-6. Restores automatically if syntax validation fails.
+- 自动寻找当前 `unified-computer-use` 插件元数据；
+- 自动寻找当前 CUA Runtime 的 `cua-repl.mjs`；
+- 修改前自动做时间戳备份；
+- 只在 `cua_repl.launch()` 前注入代理环境变量；
+- 调用当前 Runtime 自带的 `node.exe --check` 做语法检查；
+- 如果语法检查失败，自动恢复备份。
 
-### 3. Fully restart Codex
+### 3）必须彻底退出 Codex 再打开
 
-Do **not** only open a new chat. Fully exit Codex, including its tray/background process, then reopen it.
+不能只新开对话。要把 Codex 主程序、托盘/后台进程彻底退出，再重新启动。
 
-### 4. Verify
+### 4）验收
 
-Test in this order:
+至少依次验证：
 
 ```text
 cua.getState()
-list Chrome/Edge tabs
-read a public page title/body
-repeat several times
+Chrome 标签页枚举
+Edge 标签页枚举
+读取公开网页标题和正文
+连续多次调用
 ```
 
-If Browser Use works after restart, the proxy-inheritance failure mode was likely involved.
+真正恢复后才算成功。
 
-## Restore
+## 为什么只设置 `NO_PROXY` 没有用？
+
+`NO_PROXY` 的作用是“哪些地址不要走代理”。
+
+如果 Node 根本没有启用环境代理，那么单独写：
+
+```text
+NO_PROXY=localhost,127.0.0.1,::1
+```
+
+并不会让公网请求自动开始走代理。
+
+关键是同时让 Node 使用环境代理：
+
+```text
+NODE_USE_ENV_PROXY=1
+HTTP_PROXY=http://127.0.0.1:你的端口
+HTTPS_PROXY=http://127.0.0.1:你的端口
+```
+
+同时保留：
+
+```text
+NO_PROXY=localhost,127.0.0.1,::1
+```
+
+避免本地 IPC / 浏览器桥接请求被代理出去。
+
+## 更新后又坏了怎么办？
+
+Codex 更新可能创建新的：
+
+```text
+%LOCALAPPDATA%\OpenAI\Codex\runtimes\cua_node\<新ID>\...
+```
+
+旧 Runtime 里的补丁仍然存在，但新版本已经不用旧路径，因此故障可能再次出现。
+
+重新运行诊断和修复脚本即可。不要手工照抄旧的绝对路径。
+
+## 回滚
 
 ```powershell
 .\scripts\Restore-CodexBrowserProxyFix.ps1
 ```
 
-The restore helper locates the newest timestamped backup next to the patched runtime and restores it.
+## 修复思路出处 / 鸣谢
 
-## Important limitations
+本修复思路来自公开抖音教程：
 
-- Codex updates may create a new CUA runtime path, so the patch can disappear after an update.
-- The exact runtime path varies by Codex version. Do not copy another person's absolute path.
-- The proxy port is machine-specific. Do not blindly copy `10808`, `7890`, `7897`, or any other example port.
-- Keep `localhost,127.0.0.1,::1` in `NO_PROXY` so local IPC/browser-control traffic does not get sent through the external proxy.
-- Use an HTTP/HTTPS-compatible local proxy endpoint. SOCKS-only endpoints are not what this helper is designed for.
-- This repository does not disable TLS verification, browser security, Windows security, or Codex sandboxing.
+- **作者：灵感提示官**
+- **抖音号：89687306917**
 
-## Verified real-world case
+本仓库维护者**不是该抖音账号本人**，也不主张原始修复思路的首创权。本项目是在公开教程思路基础上，结合实机排障结果，重新整理成便于 GitHub、搜索引擎和 AI 检索的文档、诊断流程、回滚说明和辅助脚本。
 
-See [docs/VERIFIED_CASE.md](docs/VERIFIED_CASE.md) for the sanitized 2026-09-27 reproduction and successful repair.
+本仓库不转载原视频、不复制视频素材、不声称与原作者存在合作或授权关系。若原作者希望调整署名表述，可以提交 Issue。
 
-## Human-readable guide
+## 已验证实机案例
 
-See [docs/HUMAN_GUIDE.md](docs/HUMAN_GUIDE.md).
+本仓库不是只整理理论方法。2026-09-27 的实际 Windows 故障中，`cua.getState()` 持续报 `nodeRepl.fetch request failed`；直连 OpenAI 端点超时，而经本机 Xray `127.0.0.1:10808` 可收到 HTTP `401`。给当前 CUA Runtime 注入 Node 环境代理并完整重启 Codex 后，`cua.getState()`、Chrome 标签页读取和公开网页读取均恢复。
 
-## AI / LLM quick diagnosis
+详见：[docs/VERIFIED_CASE.md](docs/VERIFIED_CASE.md)
 
-See [AI_REPAIR_GUIDE.md](AI_REPAIR_GUIDE.md). It intentionally contains the exact error strings, decision tree, safe patch point, verification criteria, and rollback instructions so coding assistants can quickly locate the fix.
+## 给 AI / LLM 的快速修复说明
 
-## Source / credit
+为了让 ChatGPT、Codex、Claude 等 AI 更快定位该故障，仓库还提供：
 
-The original public repair idea was learned from a Douyin tutorial by:
+- [AI_REPAIR_GUIDE.md](AI_REPAIR_GUIDE.md)
+- [llms.txt](llms.txt)
 
-- **Creator:** 灵感提示官
-- **Douyin ID:** `89687306917`
+里面保留了完整错误关键词、判断条件、修复点、验证标准和回滚方式。
 
-The maintainer of this repository is **not** that Douyin account and is not claiming authorship of the original repair discovery. This repository independently organizes the publicly demonstrated idea into searchable documentation, diagnostics, rollback guidance, and helper scripts, with additional real-machine verification.
+## 人类阅读版原理说明
 
-If the original creator wants the credit wording adjusted, please open an issue.
+参见：
 
-## Related public reports
+- [docs/HUMAN_GUIDE.md](docs/HUMAN_GUIDE.md)
+- [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)
 
-The `nodeRepl.fetch request failed` symptom has multiple public Codex reports, including proxy-related reproductions. This project covers only the proxy-inheritance variant.
+## 安全说明
+
+本方案不需要：
+
+- 关闭 Windows 防火墙；
+- 关闭杀毒；
+- 关闭 TLS 验证；
+- 导出浏览器 Cookie / Token；
+- 删除 Chrome/Edge 用户数据；
+- 关闭 Codex 沙箱。
+
+只建议使用你本人信任和有权使用的本地代理。
+
+## 技术参考
+
+- Node.js 环境代理支持（`NODE_USE_ENV_PROXY` / `HTTP_PROXY` / `HTTPS_PROXY` / `NO_PROXY`）：https://nodejs.org/api/cli.html#--use-env-proxy
+- Node.js Built-in Proxy Support：https://nodejs.org/api/http.html#built-in-proxy-support
+- OpenAI Codex GitHub 中与本方案同类的 Windows/代理修复讨论：https://github.com/openai/codex/issues/44364
+- 其他同样报 `nodeRepl.fetch request failed`、但根因可能不同的 Windows 报告：https://github.com/openai/codex/issues/47123
 
 ## License
 
-MIT for the original documentation and helper scripts in this repository. The credit above refers to the public repair idea; no third-party video, transcript, or proprietary code is redistributed here.
-
-## Technical references
-
-- Node.js built-in environment proxy support (`NODE_USE_ENV_PROXY`, `HTTP_PROXY`, `HTTPS_PROXY`, `NO_PROXY`): https://nodejs.org/api/cli.html#--use-env-proxy
-- Node.js built-in proxy support details: https://nodejs.org/api/http.html#built-in-proxy-support
-- Public Codex issue with the same Windows/proxy workaround family: https://github.com/openai/codex/issues/44364
-- Other `nodeRepl.fetch request failed` Windows reports show that this error can have additional causes: https://github.com/openai/codex/issues/47123
+本仓库原创文档和辅助脚本采用 MIT License。修复思路出处按上述“鸣谢”保留署名；仓库不重新分发原抖音视频、字幕或第三方专有代码。
