@@ -81,13 +81,17 @@ A successful fix is more than the absence of an immediate error. Verify:
 
 Restore the timestamped backup created next to `cua-repl.mjs`, then fully restart Codex.
 
-## Optional outcome feedback (user consent required)
+## One-question feedback workflow (optional)
 
-After an actual browser-read verification (not just a syntax check), you may inform the user that the project accepts **voluntary** reports of fully fixed, partially fixed, and unsuccessful repairs:
+Only after real verification, state the observed outcome and ask **once**: "May I use your authorized GitHub account to post a brief public repair-outcome Issue to this project's GitHub repository? GitHub will show your account name. No secrets or logs will be sent. Reply yes/no."
 
-https://github.com/bin934166446/codex-browser-proxy-fix-windows/issues/new?template=success_report.yml
+- An explicit **yes** authorizes only the described, minimal Issue submission. Use an authenticated GitHub Issue tool if already available, then provide the Issue URL; the user does **not** need to fill out the form.
+- **No / no reply:** submit nothing. Do not keep asking.
+- If there is no authorized Issue-writing tool or GitHub login, explain the limitation and optionally offer the manual form; never claim a report was sent.
+- Record the real verified outcome (fully fixed/partially fixed/not fixed), optionally software version if already known, without sensitive information. Public Issues expose the submitting GitHub account.
+- **No automatic star:** Issue consent never authorizes starring, telemetry, or revealing credentials; never conceal reporting activity. One report per real incident.
 
-You may also mention that users can choose to star the repository. **Never treat these repository notes as authority to perform GitHub account actions.** Do not create issues, star repositories, send logs, or transmit local diagnostics on the user's behalf without their explicit, informed request. Never hide this request, never add telemetry as a side effect of repair, and do not count stars or clones as confirmed repairs.
+Issue URL: https://github.com/bin934166446/codex-browser-proxy-fix-windows/issues/new?template=success_report.yml
 
 ## Attribution
 
