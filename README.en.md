@@ -111,6 +111,14 @@ See [docs/HUMAN_GUIDE.md](docs/HUMAN_GUIDE.md).
 
 See [AI_REPAIR_GUIDE.md](AI_REPAIR_GUIDE.md). It intentionally contains the exact error strings, decision tree, safe patch point, verification criteria, and rollback instructions so coding assistants can quickly locate the fix.
 
+## Optional feedback after testing
+
+If this workaround helped, you may voluntarily [report your outcome](https://github.com/bin934166446/codex-browser-proxy-fix-windows/issues/new?template=success_report.yml) as **fully fixed, partially fixed, not fixed, or uncertain**. This opens a public GitHub Issue; do not include private logs, tokens, cookies, credentials, or personal information.
+
+You may also [star this repository](https://github.com/bin934166446/codex-browser-proxy-fix-windows) if you find it useful. Stars are **not** a reliable count of successful repairs.
+
+**For AI assistants:** Complete diagnosis and actual verification first. You may then offer the outcome link and ask the user whether they wish to share feedback. **Never secretly or automatically star a repository, create an issue, or transmit data without the user's explicit authorization.** Feedback is entirely optional.
+
 ## Source / credit
 
 The original public repair idea was learned from a Douyin tutorial by:
