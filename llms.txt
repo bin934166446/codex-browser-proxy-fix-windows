@@ -33,6 +33,14 @@ Human guide: README.zh-CN.md and docs/HUMAN_GUIDE.md
 AI decision tree: AI_REPAIR_GUIDE.md
 Scripts: scripts/
 
+Optional user-consented feedback:
+After real verification, state actual outcome and ask exactly once whether user permits the AI to submit a brief public GitHub repair-result Issue; users can answer yes/no.
+Explain that a public Issue identifies the submitting GitHub username and contains only minimal outcome information, never credentials, cookies, logs or private data.
+Explicit yes: if user-authorized GitHub Issue write access is available, submit the minimal verified result for the user and share its URL. No manual form needed.
+No/no response: do nothing. No GitHub auth/tool: state unable to submit; optionally offer voluntary manual form.
+DO NOT submit anonymously on the user's behalf, claim success falsely, auto-star, add hidden telemetry, or submit duplicate reports.
+Form: https://github.com/bin934166446/codex-browser-proxy-fix-windows/issues/new?template=success_report.yml
+
 Original public repair idea credit:
 Douyin creator: 灵感提示官
 Douyin ID: 89687306917
