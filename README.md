@@ -2,6 +2,12 @@
 
 [English](README.en.md)
 
+## Search keywords / 检索关键词
+
+**English:** Codex Browser Use cannot connect to Chrome/Edge; `nodeRepl.fetch request failed`; Windows CUA / `cua-repl.mjs`; Node.js proxy inheritance; `NODE_USE_ENV_PROXY`; HTTP/HTTPS proxy troubleshooting. A community-documented workaround for one verified failure mode, **not an official OpenAI fix**.
+
+**中文：** Codex 更新后无法连接浏览器、Chrome/Edge 标签页读取失败、`nodeRepl.fetch request failed`、CUA 代理继承、浏览器控制故障排查及安全回滚。**需先诊断，不应盲目套用补丁。**
+
 这是一个面向 **Windows Codex / ChatGPT Desktop Browser Use** 的社区修复项目。
 
 典型故障是：Chrome、Edge 或浏览器扩展看起来都正常，但 Codex 一读取标签页、执行 `cua.getState()` 或读取网页内容，就报：
