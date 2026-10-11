@@ -1,0 +1,47 @@
+name: "Repair outcome / 修复结果反馈"
+description: "Voluntarily share whether the workaround solved your problem / 自愿反馈是否修复成功"
+title: "[Outcome] "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve this community guide. Submitting this public issue is **optional** and must be done by the user or an assistant with the user's explicit approval.
+        
+        感谢帮助完善社区指南。反馈完全自愿；AI 不得在未经用户明确同意时自动提交。
+        
+        Please do NOT include cookies, tokens, private URLs, proxy credentials, account identifiers, unredacted logs, or personal details.
+  - type: dropdown
+    id: outcome
+    attributes:
+      label: "Result / 修复结果"
+      options:
+        - "Fully fixed / 完全修复"
+        - "Partially fixed / 部分修复"
+        - "Not fixed / 未修复"
+        - "Not sure / 尚不确定"
+    validations:
+      required: true
+  - type: input
+    id: codex_version
+    attributes:
+      label: "Codex version / Codex 版本（可选）"
+      placeholder: "Version number only"
+  - type: dropdown
+    id: browser
+    attributes:
+      label: "Browser / 浏览器"
+      options:
+        - "Chrome"
+        - "Edge"
+        - "Both / 两者"
+        - "Other / 其他"
+  - type: textarea
+    id: verification
+    attributes:
+      label: "Verification / 验证情况"
+      description: "For example: cua.getState, tab enumeration, reading a public page, and a full restart. Do not paste private logs. / 简述重启和实际读取测试，无需粘贴敏感日志。"
+  - type: textarea
+    id: suggestions
+    attributes:
+      label: "Notes or improvements / 补充建议（可选）"
