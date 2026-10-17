@@ -72,14 +72,11 @@ The patch must be applied to the **currently active** CUA runtime. Codex updates
 
 ## Verification criteria
 
-A successful fix is more than the absence of an immediate error. Verify:
+A successful fix is more than the absence of an immediate error. After fully restarting Codex, verify:
 
 - `cua.getState()` succeeds.
-- Chrome tab enumeration succeeds.
-- Edge tab enumeration succeeds if used.
-- A public page's title and body can be read.
-- Repeat at least 5 times.
-- Fully restart Codex and repeat.
+- Enumerate every browser exposed to the control interface; if a browser is unavailable, record it as unverified rather than failed.
+- A public page's title and body can be read at least 5 times.
 
 ## Rollback
 

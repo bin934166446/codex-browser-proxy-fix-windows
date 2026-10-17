@@ -1,7 +1,7 @@
 # Windows system-proxy case: CUA Node runtime
 
 Date: 2026-10-17
-Status: Runtime proxy patch applied; full browser-control verification pending a Codex restart.
+Status: Edge page-read recovery verified after restart; Chrome remains unverified because it was not available to the control interface. The proxy patch's causal role is not proven.
 
 ## Observed problem
 
@@ -20,8 +20,15 @@ Ran `scripts/Fix-CodexBrowserProxy.ps1` with the locally configured HTTP/mixed p
 
 This is a reversible runtime change. Use `scripts/Restore-CodexBrowserProxyFix.ps1` or restore the timestamped backup if rollback is needed.
 
-## Verification boundary and next step
+## Post-restart verification
 
-The proxy route and Node fetch behavior are verified. The CUA runtime file passes syntax validation. The Codex desktop process has not yet been restarted, so browser recovery is **not verified**. After fully exiting Codex, including its tray/background process, reopen it and test repeated tab enumeration and real page-title/body reads in Chrome and Edge.
+- After the user restarted Codex, `cua.getState()` succeeded and exposed the Edge extension. A second state read also succeeded.
+- Five actual Edge page title and DOM reads succeeded across Baidu, Cloudflare Developer Docs, Tencent Cloud's public homepage, MDN, and Mozilla.
+- Chrome was not listed by `cua.getState()`; attempting to open a Chrome tab returned that Chrome was unavailable. Chrome behavior is therefore **unverified**, not failed.
+- The WeCom developer site was blocked by the browser's site-safety policy before page content was read; this is not counted as a browser-control failure or successful read.
 
-If those reads work, record the result as fixed. If `Emulation.setFocusEmulationEnabled` still times out, keep this proxy workaround only if other CUA network calls need it, and investigate the local browser/CDP bridge as a separate failure. Do not report a CDP timeout as fixed based only on HTTP 401 reachability or Node syntax validation.
+## Result and remaining uncertainty
+
+Edge page-control recovery is verified after a full Codex restart. The original reported failure was a CDP command timeout, not the repository's canonical `nodeRepl.fetch request failed` signature. The successful post-restart reads show the current Edge path works, but do not prove that the proxy environment patch caused the recovery. If the CDP timeout returns, investigate the local browser/CDP bridge separately and retain the exact error. Cross-browser recovery remains incomplete until Chrome is exposed and tested.
+
+Do not report the proxy patch as the proven root cause based only on HTTP 401 reachability or Node syntax validation.
