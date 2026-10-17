@@ -39,7 +39,7 @@ $direct = Invoke-CurlProbe -Name 'DIRECT' -Arguments @(
     '--noproxy','*',
     '--connect-timeout',[string][Math]::Min(8,$TimeoutSeconds),
     '--max-time',[string]$TimeoutSeconds,
-    '-sS','-o','NUL','-D','-',
+    '-sS','-o','NUL','-w','HTTP %{http_code}',
     $TestUrl
 )
 
@@ -47,7 +47,7 @@ $proxied = Invoke-CurlProbe -Name 'PROXY' -Arguments @(
     '--proxy',$ProxyUrl,
     '--connect-timeout',[string][Math]::Min(8,$TimeoutSeconds),
     '--max-time',[string]$TimeoutSeconds,
-    '-sS','-o','NUL','-D','-',
+    '-sS','-o','NUL','-w','HTTP %{http_code}',
     $TestUrl
 )
 

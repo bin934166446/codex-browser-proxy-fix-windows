@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Documented a Windows case where the CUA Node runtime needs the configured system proxy, including the distinction between proxy fetch failures and browser CDP timeouts. Browser recovery remains pending a full Codex restart and real page-read verification.
+
 ## 0.1.0 - 2026-09-27
 
 - Initial public documentation.

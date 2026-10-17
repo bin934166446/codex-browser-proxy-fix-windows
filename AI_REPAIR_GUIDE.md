@@ -16,6 +16,10 @@ Use this workaround only when evidence supports this branch:
 
 If #3 and #4 are not true, do not assume this repository is the correct fix.
 
+## Distinguish CDP timeouts from proxy fetch failures
+
+A timeout while waiting for a browser DevTools Protocol command (for example, `Emulation.setFocusEmulationEnabled`) is not the same error as `nodeRepl.fetch request failed`. Direct-versus-proxy network probes can show that the CUA Node runtime needs proxy settings, but they do not prove that a page-level CDP timeout will be fixed. Apply the proxy workaround only with that limitation in mind, then fully restart Codex and repeat real page reads. If the CDP timeout remains, investigate the browser-control/CDP bridge separately. See [the Windows system-proxy case](docs/WINDOWS_SYSTEM_PROXY_CASE_2026-10-17.md).
+
 ## Root-cause model
 
 Observed chain:
