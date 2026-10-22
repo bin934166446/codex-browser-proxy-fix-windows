@@ -33,6 +33,9 @@ Then collect sanitized logs and open an issue.
 
 Run the diagnostic and patch helper again. A new runtime directory is expected after some updates.
 
-## Edge is listed, but page access stops because the URL cannot be confirmed
+## Windows Computer Use lists Edge, but its URL-confidence check stops page access
 
-This is a URL-confidence safety block, not proof of a proxy failure. Keep the exact stop message, do not try another desktop channel or scrape the address bar to bypass the check, and do not apply the proxy patch without separate direct-versus-proxy evidence. If the check keeps blocking a legitimate page, record a sanitized reproduction and escalate it to the browser-control maintainer. See [the 2026-10-22 case](URL_CONFIDENCE_GATE_CASE_2026-10-22.md).
+This is a URL-confidence safety block, not proof of a proxy failure. Do not scrape the address bar, change security policy, or apply the proxy patch without separate direct-versus-proxy evidence.
+
+For webpage tasks, the supported browser-tab API may be used when it explicitly enumerates the user's open Edge tab. Select only that returned tab, verify its URL/title/DOM, and stop if the API does not expose it or the page shows its own login, permission, or security block. Do not use this path to bypass a webpage's access controls. See [the 2026-10-22 case](URL_CONFIDENCE_GATE_CASE_2026-10-22.md).
+
