@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Recorded a separate Edge URL-confidence safety block. Window enumeration worked, but page reads were stopped before the URL or DOM could be confirmed; no proxy cause or repair is claimed. See [the incident record](docs/URL_CONFIDENCE_GATE_CASE_2026-10-22.md).
 - Documented a Windows case where the CUA Node runtime needs the configured system proxy, including the distinction between proxy fetch failures and browser CDP timeouts. After restart, five Edge page reads succeeded; Chrome was unavailable to the control interface, and the proxy patch's causal role remains unproven.
 
 ## 0.1.0 - 2026-09-27

@@ -32,3 +32,7 @@ Then collect sanitized logs and open an issue.
 ## Codex updated and the fix disappeared
 
 Run the diagnostic and patch helper again. A new runtime directory is expected after some updates.
+
+## Edge is listed, but page access stops because the URL cannot be confirmed
+
+This is a URL-confidence safety block, not proof of a proxy failure. Keep the exact stop message, do not try another desktop channel or scrape the address bar to bypass the check, and do not apply the proxy patch without separate direct-versus-proxy evidence. If the check keeps blocking a legitimate page, record a sanitized reproduction and escalate it to the browser-control maintainer. See [the 2026-10-22 case](URL_CONFIDENCE_GATE_CASE_2026-10-22.md).
