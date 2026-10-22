@@ -66,4 +66,3 @@ Windows Computer Use 通道遇到的是 **浏览器 URL 置信度安全门拦截
 - 未发生未授权提交或业务数据变更。
 
 以上条件已通过浏览器标签 API 验证。Windows Computer Use 的 URL 置信度安全门仍未修复，也未声称已修复。
-
